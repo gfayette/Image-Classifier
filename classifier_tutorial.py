@@ -10,6 +10,9 @@ from tensorflow.keras.models import Sequential
 
 import pathlib
 
+from PIL import Image
+import requests
+
 
 
 
@@ -140,8 +143,6 @@ history = model.fit(
 
 
 
-
-
 #Model results
 acc = history.history['accuracy']
 val_acc = history.history['val_accuracy']
@@ -170,6 +171,12 @@ plt.show()
 #Prediction
 sunflower_url = "https://storage.googleapis.com/download.tensorflow.org/example_images/592px-Red_sunflower.jpg"
 sunflower_path = tf.keras.utils.get_file('Red_sunflower', origin=sunflower_url)
+
+dandelion_url = "https://news.wttw.com/sites/default/files/field/image/DandelionFenceCrop.jpg"#same as in sunflower
+im = Image.open(requests.get(dandelion_url, stream=True).raw)#im is a jpeg variable, does successfully open image
+#next line returns a "403: Forbidden" error so I commented it out
+#I suspect that because it's a web image not a tensorflow image, the program does not have access permissions
+#dandelion_path = tf.keras.utils.get_file('Dandelion_fence', origin=dandelion_url)#path variable, same as in sunflower
 
 img = keras.preprocessing.image.load_img(
     sunflower_path, target_size=(img_height, img_width)
