@@ -1,11 +1,11 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QFileDialog, QPushButton, QVBoxLayout
+from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QFileDialog, QPushButton, QVBoxLayout, QHBoxLayout
 from PyQt5.QtGui import QPixmap
-from PyQt5.Qt5.QtCore import QDir
+from PyQt5.QtCore import QDir
 #TODO import project script here
 
 
-class AIApp(Qwidget):
+class AIApp(QWidget):
     def __init__(self):
         super().__init__()
         self.resize(800, 600)
@@ -56,7 +56,7 @@ class AIApp(Qwidget):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    window = AIApp(sys.argv)
+    window = AIApp()
     window.show()
 
     sys.exit(app.exec_())
