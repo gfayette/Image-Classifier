@@ -30,7 +30,7 @@ class AIApp(QWidget):
         layout.addWidget(self.button2)
 
         labelLayout = QVBoxLayout()
-        labelLayout.addWidget(layout)
+        labelLayout.addLayout(layout)
         labelLayout.addWidget(self.textLabel)
         labelLayout.addWidget(self.imageLabel)
 
