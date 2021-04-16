@@ -35,7 +35,7 @@ class Model:
 
         # Save and load
         self.checkpoint_path = c_path
-        self.checkpoint_dir = os.path.dirname(checkpoint_path)
+        self.checkpoint_dir = os.path.dirname(self.checkpoint_path)
 
     # Only used when the data set needs to be downloaded
     def download(self, dataset_url, folder_name):
