@@ -39,6 +39,7 @@ class Model:
         self.checkpoint_path = c_path
         self.checkpoint_dir = os.path.dirname(self.checkpoint_path)
 
+    # Only used when the data set needs to be downloaded
     def download(self, dataset_url):
         data_dir = tf.keras.utils.get_file('flower_photos', origin=dataset_url, untar=True)
         data_dir = pathlib.Path(data_dir)
@@ -91,6 +92,7 @@ class Model:
         self.train_ds = self.train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
         self.val_ds = self.val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
+    # Create a model
     def create_and_compile_model(self):
         # Data augmentation
         data_augmentation = keras.Sequential(
@@ -127,6 +129,7 @@ class Model:
         self.model.summary()
         self.evaluate_model()
 
+    # Load the latest training weights
     def load_latest_checkpoint(self):
         latest = tf.train.latest_checkpoint(self.checkpoint_dir)
         print("\nLoading checkpoint: " + str(latest))
@@ -136,6 +139,7 @@ class Model:
         else:
             print("No checkpoint saved in: " + str(self.checkpoint_dir))
 
+    # Train the model
     def train_model(self):
         # Create a callback that saves the model's weights
         cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=self.checkpoint_path,
@@ -154,10 +158,12 @@ class Model:
         # self.plot_history()
         self.evaluate_model()
 
+    # Print out the model's accuracy
     def evaluate_model(self):
         loss, acc = self.model.evaluate(self.val_ds, verbose=2)
         print("\nModel accuracy: {:5.2f}%".format(100 * acc))
 
+    # Plot training history
     def plot_history(self):
         acc = self.history.history['accuracy']
         val_acc = self.history.history['val_accuracy']
@@ -181,6 +187,7 @@ class Model:
         plt.title('Training and Validation Loss')
         plt.show()
 
+    # Make a prediction on an image
     def predict(self, img_path):
         img = keras.preprocessing.image.load_img(
             img_path, target_size=(self.img_height, self.img_width)
@@ -198,12 +205,14 @@ class Model:
         )
         return self.class_names[np.argmax(score)]
 
+    # Make predictions on all images in a directory
     def predict_all(self, path):
         files = [f for f in listdir(path) if isfile(join(path, f))]
         for f in files:
-            print(self.predict(path + f))
+            self.predict(path + f)
 
 
+# The flower classifier
 def flower_model(train_epochs):
     m = Model("./training_checkpoints/flowers/training_0/cp.ckpt")
     m.num_epochs = train_epochs
@@ -213,11 +222,12 @@ def flower_model(train_epochs):
 
     m.create_and_compile_model()
     m.load_latest_checkpoint()
-    m.train_model()
+    #m.train_model()
 
     m.predict_all('./test_images/flowers/')
 
 
+# The landscape classifier
 def landscape_model(train_epochs):
     m = Model("./training_checkpoints/landscapes/training_0/cp.ckpt")
     m.num_epochs = train_epochs
