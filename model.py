@@ -24,25 +24,24 @@ class Model:
         self.img_width = 180
         self.batch_size = 32
 
-        # Model
-        self.num_epochs = None
-        self.history = None
-
-        # The classifications in the data set
+        # Classifications
         self.class_names = None
         self.num_classes = None
 
-        # The classifier model
+        # Model
         self.model = None
+        self.num_epochs = None
+        self.history = None
 
         # Save and load
         self.checkpoint_path = c_path
         self.checkpoint_dir = os.path.dirname(self.checkpoint_path)
 
     # Only used when the data set needs to be downloaded
-    def download(self, dataset_url):
-        data_dir = tf.keras.utils.get_file('flower_photos', origin=dataset_url, untar=True)
+    def download(self, dataset_url, folder_name):
+        data_dir = tf.keras.utils.get_file(folder_name, origin=dataset_url, untar=True)
         data_dir = pathlib.Path(data_dir)
+        print("\nData downloaded to: " + str(data_dir))
         return data_dir
 
     # For data that is not split into training and validation
@@ -87,7 +86,6 @@ class Model:
 
     # Configure dataset for performance
     def configure_data_sets(self):
-
         AUTOTUNE = tf.data.AUTOTUNE
         self.train_ds = self.train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
         self.val_ds = self.val_ds.cache().prefetch(buffer_size=AUTOTUNE)
@@ -133,7 +131,7 @@ class Model:
     def load_latest_checkpoint(self):
         latest = tf.train.latest_checkpoint(self.checkpoint_dir)
         print("\nLoading checkpoint: " + str(latest))
-        if not latest is None:
+        if latest is not None:
             self.model.load_weights(latest)
             self.evaluate_model()
         else:
@@ -217,12 +215,13 @@ def flower_model(train_epochs):
     m = Model("./training_checkpoints/flowers/training_0/cp.ckpt")
     m.num_epochs = train_epochs
 
-    dir = m.download("https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz")
+    dir = m.download("https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz",
+                     "flower_photos")
     m.get_and_split_data_set(dir)
 
     m.create_and_compile_model()
     m.load_latest_checkpoint()
-    #m.train_model()
+    m.train_model()
 
     m.predict_all('./test_images/flowers/')
 
@@ -238,7 +237,9 @@ def landscape_model(train_epochs):
     m.load_latest_checkpoint()
     m.train_model()
 
+    m.predict_all('./test_images/landscapes/')
+
 
 if __name__ == '__main__':
-    flower_model(1)
-    landscape_model(1)
+    flower_model(0)
+    landscape_model(0)
