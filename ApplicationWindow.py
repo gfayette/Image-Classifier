@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QFileDialog, QPushButton, QVBoxLayout, QHBoxLayout
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QDir
+import model
 #TODO import project script here
 
 
@@ -9,6 +10,8 @@ class AIApp(QWidget):
     def __init__(self):
         super().__init__()
         self.resize(800, 600)
+
+        self.im_path = None
 
         #set up and connect button 1
         self.button1 = QPushButton('Upload Image')
@@ -44,11 +47,15 @@ class AIApp(QWidget):
         #the './' parameter might be a source of an error. That parameter is the directory that opens in the fileDialog, and I want it to remain default
         file_name, _ = QFileDialog.getOpenFileName(self, 'Open Image File', './', "Image files (*.jpg *.jpeg *.gif *.png)")
         self.imageLabel.setPixmap(QPixmap(file_name))
+        self.im_path = file_name
         self.textLabel.setText('check image to see what kind of landscape it is')
 
     def checkImage(self):
         #TODO call image classifier from this function. It would be pretty easy if you just need the filename for the script to access the image, but it shouldn't be too hard.
         self.textLabel.setText('this text is supposed to be the output from the image classifier')
+
+        m = model.flower_model(0)
+        m.predict(self.im_path)
         
 
 

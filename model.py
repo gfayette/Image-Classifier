@@ -35,7 +35,7 @@ class Model:
 
         # Save and load
         self.checkpoint_path = c_path
-        self.checkpoint_dir = os.path.dirname(self.checkpoint_path)
+        self.checkpoint_dir = os.path.dirname(checkpoint_path)
 
     # Only used when the data set needs to be downloaded
     def download(self, dataset_url, folder_name):
@@ -223,7 +223,9 @@ def flower_model(train_epochs):
     m.load_latest_checkpoint()
     m.train_model()
 
-    m.predict_all('./test_images/flowers/')
+    #m.predict_all('./test_images/flowers/')
+
+    return m
 
 
 # The landscape classifier
@@ -237,7 +239,9 @@ def landscape_model(train_epochs):
     m.load_latest_checkpoint()
     m.train_model()
 
-    m.predict_all('./test_images/landscapes/')
+    #m.predict_all('./test_images/landscapes/')
+
+    return m
 
 
 if __name__ == '__main__':
