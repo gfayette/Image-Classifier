@@ -55,7 +55,8 @@ class AIApp(QWidget):
         self.textLabel.setText('this text is supposed to be the output from the image classifier')
 
         m = model.flower_model(0)
-        m.predict(self.im_path)
+        s = m.get_prediction(self.im_path)
+        self.textLabel.setText(s)
         
 
 

@@ -37,6 +37,9 @@ class Model:
         self.checkpoint_path = c_path
         self.checkpoint_dir = os.path.dirname(self.checkpoint_path)
 
+        #string for window
+        self.prediction_string = None
+
     # Only used when the data set needs to be downloaded
     def download(self, dataset_url, folder_name):
         data_dir = tf.keras.utils.get_file(folder_name, origin=dataset_url, untar=True)
@@ -201,6 +204,7 @@ class Model:
             "This image most likely belongs to {} with a {:.2f} percent confidence."
                 .format(self.class_names[np.argmax(score)], 100 * np.max(score))
         )
+        self.prediction_string = "This image most likely belongs to " + self.class_names[np.argmax(score)] + "with a " + str(truncate(100 * np.max(score))) + "percent confidence."
         return self.class_names[np.argmax(score)]
 
     # Make predictions on all images in a directory
@@ -209,6 +213,13 @@ class Model:
         for f in files:
             self.predict(path + f)
 
+    def get_prediction(self, img_path):
+        self.predict(img_path)
+        return self.prediction_string
+
+#to truncate a number to two decimals
+def truncate(n):
+    return int(n * 100) / 100
 
 # The flower classifier
 def flower_model(train_epochs):
