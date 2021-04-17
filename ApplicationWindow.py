@@ -11,7 +11,9 @@ class AIApp(QWidget):
         super().__init__()
         self.resize(800, 600)
 
+        #set up for prediction
         self.im_path = None
+        self.m = model.flower_model(0)
 
         #set up and connect button 1
         self.button1 = QPushButton('Upload Image')
@@ -51,11 +53,7 @@ class AIApp(QWidget):
         self.textLabel.setText('check image to see what kind of landscape it is')
 
     def checkImage(self):
-        #TODO call image classifier from this function. It would be pretty easy if you just need the filename for the script to access the image, but it shouldn't be too hard.
-        self.textLabel.setText('this text is supposed to be the output from the image classifier')
-
-        m = model.flower_model(0)
-        s = m.get_prediction(self.im_path)
+        s = self.m.get_prediction(self.im_path)
         self.textLabel.setText(s)
         
 

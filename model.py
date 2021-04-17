@@ -204,7 +204,7 @@ class Model:
             "This image most likely belongs to {} with a {:.2f} percent confidence."
                 .format(self.class_names[np.argmax(score)], 100 * np.max(score))
         )
-        self.prediction_string = "This image most likely belongs to " + self.class_names[np.argmax(score)] + "with a " + str(truncate(100 * np.max(score))) + "percent confidence."
+        self.prediction_string = "This image most likely belongs to " + self.class_names[np.argmax(score)] + " with a " + str(truncate(100 * np.max(score))) + " percent confidence."
         return self.class_names[np.argmax(score)]
 
     # Make predictions on all images in a directory
