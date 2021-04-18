@@ -159,7 +159,7 @@ class Model:
         )
 
         # self.plot_history()
-        self.evaluate_model()
+        # self.evaluate_model()
 
     # Print out the model's accuracy
     def evaluate_model(self):
@@ -228,25 +228,93 @@ def train_series(save_dir, num_epochs):
     m.create_and_compile_model()
 
     stats_arr = []
+    stats_arr2 = []
     for i in range(0, num_epochs):
         checkpoint_path = str(save_dir) + str(i) + "/cp.ckpt"
         m.set_checkpoint(checkpoint_path)
         m.train_model()
         loss, acc = m.model.evaluate(m.val_ds, verbose=2)
+        loss2, acc2 = m.model.evaluate(m.train_ds, verbose=2)
         stats_arr.append((str(i), str(loss), str(acc)))
+        stats_arr2.append((str(i), str(loss2), str(acc2)))
 
+    # VAL
+    print("\n\nVAL\n")
     for i in range(0, num_epochs):
-        print("epoch: " + stats_arr[i][0] + "\tloss: " + stats_arr[i][1] + "\taccuracy: " + stats_arr[i][2])
+        print("VAL epoch: " + stats_arr[i][0] + "\tloss: " + stats_arr[i][1] + "\taccuracy: " + stats_arr[i][2])
 
     # Loss
-    print("\n\nLoss:\n")
+    print("\n\nVAL Loss:\n")
     for i in range(0, num_epochs):
-        print(stats_arr[i][1] + "\n")
+        print(stats_arr[i][1])
 
     # Acc
-    print("\n\nAcc:\n")
+    print("\n\nVAL Acc:\n")
     for i in range(0, num_epochs):
-        print(stats_arr[i][2] + "\n")
+        print(stats_arr[i][2])
+
+    # Train
+    print("\n\nTrain\n")
+    for i in range(0, num_epochs):
+        print("TRAIN epoch: " + stats_arr2[i][0] + "\tloss: " + stats_arr2[i][1] + "\taccuracy: " + stats_arr2[i][2])
+
+    # Loss
+    print("\n\nTRAIN Loss:\n")
+    for i in range(0, num_epochs):
+        print(stats_arr2[i][1])
+
+    # Acc
+    print("\n\nTRAIN Acc:\n")
+    for i in range(0, num_epochs):
+        print(stats_arr2[i][2])
+
+
+def train_series2(save_dir, num_epochs):
+    m = Model()
+    m.num_epochs = 1
+    m.get_data_sets('../archive/seg_train/seg_train', '../archive/seg_test/seg_test')
+    m.create_and_compile_model()
+
+    stats_arr = []
+    stats_arr2 = []
+    for i in range(0, num_epochs):
+        checkpoint_path = str(save_dir) + str(i) + "/cp.ckpt"
+        m.set_checkpoint(checkpoint_path)
+        m.train_model()
+        loss, acc = m.model.evaluate(m.val_ds, verbose=2)
+        loss2, acc2 = m.model.evaluate(m.train_ds, verbose=2)
+        stats_arr.append((str(i), str(loss), str(acc)))
+        stats_arr2.append((str(i), str(loss2), str(acc2)))
+
+    # VAL
+    print("\n\nVAL\n")
+    for i in range(0, num_epochs):
+        print("VAL epoch: " + stats_arr[i][0] + "\tloss: " + stats_arr[i][1] + "\taccuracy: " + stats_arr[i][2])
+
+    # Loss
+    print("\n\nVAL Loss:\n")
+    for i in range(0, num_epochs):
+        print(stats_arr[i][1])
+
+    # Acc
+    print("\n\nVAL Acc:\n")
+    for i in range(0, num_epochs):
+        print(stats_arr[i][2])
+
+    # Train
+    print("\n\nTrain\n")
+    for i in range(0, num_epochs):
+        print("TRAIN epoch: " + stats_arr2[i][0] + "\tloss: " + stats_arr2[i][1] + "\taccuracy: " + stats_arr2[i][2])
+
+    # Loss
+    print("\n\nTRAIN Loss:\n")
+    for i in range(0, num_epochs):
+        print(stats_arr2[i][1])
+
+    # Acc
+    print("\n\nTRAIN Acc:\n")
+    for i in range(0, num_epochs):
+        print(stats_arr2[i][2])
 
 
 # The flower classifier
@@ -286,5 +354,5 @@ def landscape_model(train_epochs):
 
 
 if __name__ == '__main__':
-    train_series("../checkpoints/flower0/", 50)
-    #landscape_model(0)
+    train_series("../checkpoints/flower0/", 100)
+    train_series2("../checkpoints/landscape0/", 100)
