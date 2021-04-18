@@ -1,0 +1,7 @@
+The following packages are required to run the project:
+
+PyQt5
+matplotlib
+Pillow
+numpy
+tensorflow
