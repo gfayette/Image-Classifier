@@ -40,15 +40,19 @@ class Model:
         # string for window
         self.prediction_string = None
 
-    # Only used when the data set needs to be downloaded
     def download(self, dataset_url, folder_name):
+        """Only used when the data set needs to be downloaded
+
+        """
         data_dir = tf.keras.utils.get_file(folder_name, origin=dataset_url, untar=True)
         data_dir = pathlib.Path(data_dir)
         print("\nData downloaded to: " + str(data_dir))
         return data_dir
 
-    # For data that is not split into training and validation
     def get_and_split_data_set(self, data_dir):
+        """For data that is not split into training and validation
+
+        """
         self.train_ds = tf.keras.preprocessing.image_dataset_from_directory(
             data_dir,
             validation_split=0.2,
@@ -69,8 +73,11 @@ class Model:
         self.num_classes = len(self.class_names)
         self.configure_data_sets()
 
-    # For data that is already split into training and validation
+
     def get_data_sets(self, train_dir, val_dir):
+        """For data that is already split into training and validation
+
+        """
         self.train_ds = tf.keras.preprocessing.image_dataset_from_directory(
             train_dir,
             seed=123,
@@ -87,14 +94,18 @@ class Model:
         self.num_classes = len(self.class_names)
         self.configure_data_sets()
 
-    # Configure dataset for performance
     def configure_data_sets(self):
+        """Configure dataset for performance
+
+        """
         AUTOTUNE = tf.data.AUTOTUNE
         self.train_ds = self.train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
         self.val_ds = self.val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
-    # Create a model
     def create_and_compile_model(self):
+        """Create a model with data augmentation and compile it
+
+        """
         # Data augmentation
         data_augmentation = keras.Sequential(
             [
@@ -128,20 +139,22 @@ class Model:
                            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                            metrics=['accuracy'])
         self.model.summary()
-        self.evaluate_model()
 
-    # Load the latest training weights
     def load_latest_checkpoint(self):
+        """Load the latest training weights
+
+        """
         latest = tf.train.latest_checkpoint(self.checkpoint_dir)
         print("\nLoading checkpoint: " + str(latest))
         if latest is not None:
             self.model.load_weights(latest)
-            self.evaluate_model()
         else:
             print("No checkpoint saved in: " + str(self.checkpoint_dir))
 
-    # Train the model
     def train_model(self):
+        """Train the model and save a checkpoint after each epoch
+
+        """
         # Create a callback that saves the model's weights
         cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=self.checkpoint_path,
                                                          save_weights_only=True,
@@ -159,13 +172,17 @@ class Model:
         # self.plot_history()
         self.evaluate_model()
 
-    # Print out the model's accuracy
     def evaluate_model(self):
+        """Print out the model's accuracy
+
+        """
         loss, acc = self.model.evaluate(self.val_ds, verbose=2)
         print("\nModel accuracy: {:5.2f}%".format(100 * acc))
 
-    # Plot training history
     def plot_history(self):
+        """Plot training history
+
+        """
         acc = self.history.history['accuracy']
         val_acc = self.history.history['val_accuracy']
 
@@ -188,8 +205,10 @@ class Model:
         plt.title('Training and Validation Loss')
         plt.show()
 
-    # Make a prediction on an image
     def predict(self, img_path):
+        """Make a prediction of the classification of an image
+
+        """
         img = keras.preprocessing.image.load_img(
             img_path, target_size=(self.img_height, self.img_width)
         )
@@ -205,27 +224,30 @@ class Model:
                 .format(self.class_names[np.argmax(score)], 100 * np.max(score))
         )
         return "This image most likely belongs to " + self.class_names[np.argmax(score)] + " with a " + str(
-            truncate(100 * np.max(score))) + " percent confidence."
+            self.truncate(100 * np.max(score))) + " percent confidence."
 
-    # Make predictions on all images in a directory
     def predict_all(self, path):
+        """Make predictions on all images in a directory
+
+        """
         files = [f for f in listdir(path) if isfile(join(path, f))]
         for f in files:
             print(self.predict(path + f))
 
+    def truncate(self, n):
+        """To truncate a number to two decimals
 
-# To truncate a number to two decimals
-def truncate(n):
-    return int(n * 100) / 100
+        """
+        return int(n * 100) / 100
 
 
-# The flower classifier
 def flower_model():
-    m = Model("./training_checkpoints/flowers/training_0/cp.ckpt")
+    """The flower classifier
 
-    dl_dir = m.download("https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz",
-                        "flower_photos")
-    m.get_and_split_data_set(dl_dir)
+    """
+    m = Model("./training_checkpoints/flowers/training_0/cp.ckpt")
+    m.num_classes = 5
+    m.class_names = ['daisy', 'dandelion', 'roses', 'sunflowers', 'tulips']
 
     m.create_and_compile_model()
     m.load_latest_checkpoint()
@@ -233,11 +255,13 @@ def flower_model():
     return m
 
 
-# The landscape classifier
 def landscape_model():
-    m = Model("./training_checkpoints/landscapes/training_0/cp.ckpt")
+    """The landscape classifier
 
-    m.get_data_sets('../archive/seg_train/seg_train', '../archive/seg_test/seg_test')
+    """
+    m = Model("./training_checkpoints/landscapes/training_0/cp.ckpt")
+    m.num_classes = 6
+    m.class_names = ['buildings', 'forest', 'glacier', 'mountain', 'sea', 'street']
 
     m.create_and_compile_model()
     m.load_latest_checkpoint()
@@ -246,5 +270,5 @@ def landscape_model():
 
 
 if __name__ == '__main__':
-    flower_model(0)
-    landscape_model(0)
+    flower_model()
+    landscape_model()

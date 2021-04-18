@@ -6,13 +6,14 @@ from PyQt5.QtCore import QDir
 import model
 
 
-# TODO import project script here
-
 
 class AIApp(QWidget):
     def __init__(self):
         super().__init__()
         self.resize(800, 600)
+
+        # assuming python works like java, other methods should be able to access and modify this
+        self.imageUploaded = False
 
         # Main container
         mainLayout = QVBoxLayout()
@@ -53,7 +54,8 @@ class AIApp(QWidget):
         mainLayout.addWidget(self.textLabel)
         mainLayout.addWidget(self.imageLabel)
 
-        # the final layout should be the two buttons side by side at the top, then the text box below that, and the image preview at the bottom
+        # the final layout should be the two buttons side by side at the top,
+        # then the text box below that, and the image preview at the bottom
         self.setLayout(mainLayout)
 
         # initializes text of the text box
@@ -64,6 +66,9 @@ class AIApp(QWidget):
         self.m = model.flower_model()
 
     def change_model(self):
+        """Switches between the flower and landscape classifier
+
+        """
         radioButton = self.sender()
         if radioButton.isChecked():
             if radioButton.type == 'Flowers':
@@ -72,16 +77,25 @@ class AIApp(QWidget):
                 self.m = model.landscape_model()
 
     def get_image_file(self):
-        # the './' parameter might be a source of an error. That parameter is the directory that opens in the fileDialog, and I want it to remain default
+        """Opens the file explorer and allows the user to select any of the given image files.
+
+        """
         file_name, _ = QFileDialog.getOpenFileName(self, 'Open Image File', './',
                                                    "Image files (*.jpg *.jpeg *.gif *.png)")
         self.imageLabel.setPixmap(QPixmap(file_name))
         self.im_path = file_name
         self.textLabel.setText('check image to see what kind of landscape it is')
+        self.imageUploaded = True
 
     def check_image(self):
-        s = self.m.predict(self.im_path)
-        self.textLabel.setText(s)
+        """Sends the selected image to the image classifier and outputs the result
+
+        """
+        if (self.imageUploaded):
+            s = self.m.predict(self.im_path)
+            self.textLabel.setText(s)
+        else:
+            self.textLabel.setText('you have to upload an image before you check it')
 
 
 if __name__ == '__main__':
