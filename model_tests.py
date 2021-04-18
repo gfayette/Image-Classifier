@@ -14,7 +14,7 @@ from os.path import isfile, join
 
 
 class Model:
-    def __init__(self, c_path):
+    def __init__(self):
         # Training and validation data sets
         self.train_ds = None
         self.val_ds = None
@@ -33,12 +33,14 @@ class Model:
         self.num_epochs = None
         self.history = None
 
+        # Save and Load
+        self.checkpoint_path = None
+        self.checkpoint_dir = None
+
+    def set_checkpoint(self, c_path):
         # Save and load
         self.checkpoint_path = c_path
         self.checkpoint_dir = os.path.dirname(self.checkpoint_path)
-
-        # string for window
-        self.prediction_string = None
 
     # Only used when the data set needs to be downloaded
     def download(self, dataset_url, folder_name):
@@ -127,7 +129,7 @@ class Model:
         self.model.compile(optimizer='adam',
                            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                            metrics=['accuracy'])
-        self.model.summary()
+        # self.model.summary()
         self.evaluate_model()
 
     # Load the latest training weights
@@ -204,47 +206,85 @@ class Model:
             "This image most likely belongs to {} with a {:.2f} percent confidence."
                 .format(self.class_names[np.argmax(score)], 100 * np.max(score))
         )
-        return "This image most likely belongs to " + self.class_names[np.argmax(score)] + " with a " + str(
-            truncate(100 * np.max(score))) + " percent confidence."
+        return self.class_names[np.argmax(score)]
 
     # Make predictions on all images in a directory
     def predict_all(self, path):
         files = [f for f in listdir(path) if isfile(join(path, f))]
         for f in files:
-            print(self.predict(path + f))
+            self.predict(path + f)
+
+    def get_prediction(self, img_path):
+        self.predict(img_path)
+        return self.prediction_string
 
 
-# To truncate a number to two decimals
-def truncate(n):
-    return int(n * 100) / 100
+def train_series(save_dir, num_epochs):
+    m = Model()
+    m.num_epochs = 1
+    dir = m.download("https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz",
+                     "flower_photos")
+    m.get_and_split_data_set(dir)
+    m.create_and_compile_model()
+
+    stats_arr = []
+    for i in range(0, num_epochs):
+        checkpoint_path = str(save_dir) + str(i) + "/cp.ckpt"
+        m.set_checkpoint(checkpoint_path)
+        m.train_model()
+        loss, acc = m.model.evaluate(m.val_ds, verbose=2)
+        stats_arr.append((str(i), str(loss), str(acc)))
+
+    for i in range(0, num_epochs):
+        print("epoch: " + stats_arr[i][0] + "\tloss: " + stats_arr[i][1] + "\taccuracy: " + stats_arr[i][2])
+
+    # Loss
+    print("\n\nLoss:\n")
+    for i in range(0, num_epochs):
+        print(stats_arr[i][1] + "\n")
+
+    # Acc
+    print("\n\nAcc:\n")
+    for i in range(0, num_epochs):
+        print(stats_arr[i][2] + "\n")
 
 
 # The flower classifier
-def flower_model():
-    m = Model("./training_checkpoints/flowers/training_0/cp.ckpt")
+def flower_model(train_epochs):
+    m = Model()
+    m.num_epochs = train_epochs
 
-    dl_dir = m.download("https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz",
-                        "flower_photos")
-    m.get_and_split_data_set(dl_dir)
+    dir = m.download("https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz",
+                     "flower_photos")
+    m.get_and_split_data_set(dir)
 
     m.create_and_compile_model()
+    m.set_checkpoint("./training_checkpoints/flowers/training_0/cp.ckpt")
     m.load_latest_checkpoint()
+    m.train_model()
+
+    m.predict_all('./test_images/flowers/')
 
     return m
 
 
 # The landscape classifier
-def landscape_model():
-    m = Model("./training_checkpoints/landscapes/training_0/cp.ckpt")
+def landscape_model(train_epochs):
+    m = Model()
+    m.num_epochs = train_epochs
 
     m.get_data_sets('../archive/seg_train/seg_train', '../archive/seg_test/seg_test')
 
     m.create_and_compile_model()
+    m.set_checkpoint("./training_checkpoints/landscapes/training_0/cp.ckpt")
     m.load_latest_checkpoint()
+    m.train_model()
+
+    m.predict_all('./test_images/landscapes/')
 
     return m
 
 
 if __name__ == '__main__':
-    flower_model(0)
-    landscape_model(0)
+    train_series("../checkpoints/flower0/", 50)
+    #landscape_model(0)
